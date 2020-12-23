@@ -41,6 +41,7 @@ scan_int                        { \_ -> SCANINT}
 "!"                             { \_ -> NOT}
 ";"                             { \_ -> SEMI}
 ","                             { \_ -> COMMA}
+"&&"                            { \_ -> AND}
 $alpha($alpha|$digit)*          { \s -> ID s }
 $digit+                         { \s -> NUM (read s)}
 
@@ -79,6 +80,7 @@ data Token =  BOOL
             | CLOSEPARENTHESIS
             | WHILE
             | NOT
+            | AND
 
             deriving (Eq, Show)
 

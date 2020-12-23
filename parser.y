@@ -45,10 +45,13 @@ num                                                                      {NUM $$
 ")"                                                                      {CLOSEPARENTHESIS}
 while                                                                    {WHILE}
 "!"                                                                      {NOT}
+"&&"                                                                     {AND}
 
 
 %right else
 %right "="
+%left "||"
+%left "&&"
 %left "==" "!="
 %left "<" ">" ">=" "<="
 %left "+" "-"
@@ -69,8 +72,8 @@ GDefn: Type id "(" ")" "{" "}"                                          {FuncNoA
      | Type id "(" GDefns ")" "{" Stmts "}"                            {FuncWithArgsAndStmts $1 $2 $4 $7}
 
 
-GDefns: Type id                                                       {Arg_ $1 $2}
-      | Type id "," GDefns                                           {Arg $1 $2 $4}
+GDefns: Type id                                                       {Arg1 $1 $2}
+      | Type id "," GDefns                                            {Arg2 $1 $2 $4}
 
 Stmt: Simple ";"                                                           {SimpleOp $1}
   | if "(" Exp ")" Stmt else Stmt                                      {IfElse $3 $5 $7}
@@ -118,6 +121,7 @@ Exp: num                                                                 {Num $1
  | Exp ">=" Exp                                                        {Greateroreq $1 $3}
  | Exp "<=" Exp                                                        {Lesseroreq $1 $3}
  | Exp "!=" Exp                                                        {Different $1 $3}
+ | Exp "&&" Exp                                                  {FunctionAnd $1 $3}
  | "!" Exp                                                            {Not $2}
  | id                                                                  {Id $1}
  | scan_int "(" ")"                                                   {ScanInt}
@@ -130,7 +134,7 @@ data Prog = NewFunction_ GDefn | NewFunction GDefn Prog deriving Show
 data GDefn = FuncNoArgsNoStmts Type String | FuncNoArgsOnlyStmts Type String Stmts
            | FuncOnlyArgsNoStmts Type String GDefns | FuncWithArgsAndStmts Type String GDefns Stmts deriving Show
 
-data GDefns = Arg_ Type String | Arg Type String GDefns deriving Show
+data GDefns = Arg1 Type String | Arg2 Type String GDefns deriving Show
 
 data Stmt = SimpleOp Simple | IfElse Exp Stmt Stmt | IfBElse Exp Stmts Stmt
           | IfElseB Exp Stmt Stmts | IfBElseB Exp Stmts Stmts | If Exp Stmt | IfB Exp Stmts
@@ -150,7 +154,7 @@ data Type = Int | Bool deriving Show
 data Exp = Num Int | True_ | False_ | Add Exp Exp | Subtract Exp Exp | Divide Exp Exp
          | Multiply Exp Exp | Module Exp Exp | Equals Exp Exp | Greater Exp Exp | Lesser Exp Exp
          | Greateroreq Exp Exp | Lesseroreq Exp Exp | Different Exp Exp | Not Exp
-         | Id String | FunctionCall String Exp | ScanInt deriving Show
+         | Id String | FunctionCall String Exp | ScanInt | FunctionAnd Exp Exp deriving Show
 
 
 

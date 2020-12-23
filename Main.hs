@@ -1,9 +1,14 @@
 module Main where
-
 import Parser
 import Lexer
+import Interm
 
-main :: IO ()
+main :: IO()
 main = do
-    txt <- getContents
-    print (parser $ alexScanTokens txt)
+  txt <- getContents
+  let stm = (alexScanTokens txt)
+  print stm
+  let code = parser $ stm
+  print code
+  let interm = genProg $ code
+  print interm
